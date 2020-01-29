@@ -14,16 +14,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 public class GraveRenderer extends BlockEntityRenderer<BetterGraveBE> {
-    BlockEntityRenderDispatcher dispatcher;
     public GraveRenderer(BlockEntityRenderDispatcher dispatcher) {
         super(dispatcher);
-        this.dispatcher = dispatcher;
     }
 
     @Override
     public void render(BetterGraveBE blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
         matrices.push();
-        SkullBlockEntityRenderer.render(null, 50f, SkullBlock.Type.PLAYER, blockEntity.getOwner(), 0f, matrices, vertexConsumers, light);
+        matrices.translate(0.0, 0.125, 0.0);
+        SkullBlockEntityRenderer.render(null, 0f, SkullBlock.Type.PLAYER, blockEntity.getOwner(), 0f, matrices, vertexConsumers, light);
         matrices.pop();
         matrices.push();
         matrices.translate(0.5, 1.0, 0.5);
