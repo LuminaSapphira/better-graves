@@ -22,8 +22,6 @@ public class GraveRenderer extends BlockEntityRenderer<BetterGraveBE> {
 
     @Override
     public void render(BetterGraveBE blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
-
-
         matrices.push();
         SkullBlockEntityRenderer.render(null, 50f, SkullBlock.Type.PLAYER, blockEntity.getOwner(), 0f, matrices, vertexConsumers, light);
         matrices.pop();

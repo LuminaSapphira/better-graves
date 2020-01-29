@@ -1,7 +1,6 @@
 package bettergraves;
 
-import bettergraves.api.DeathHandler;
-import bettergraves.api.RestoreHandler;
+import bettergraves.api.BetterGravesAPI;
 import bettergraves.block.BetterGraveBE;
 import bettergraves.block.BetterGraveBlock;
 import net.fabricmc.api.ModInitializer;
@@ -19,9 +18,6 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class BetterGraves implements ModInitializer {
 
     public static Logger LOGGER = LogManager.getLogger();
@@ -31,9 +27,6 @@ public class BetterGraves implements ModInitializer {
 
     public static BlockEntityType<BetterGraveBE> BETTER_GRAVE_BE_TYPE;
     public static final BetterGraveBlock BETTER_GRAVE_BLOCK = new BetterGraveBlock();
-
-    public static Map<String, DeathHandler> deathHandlers = new HashMap<>();
-    public static Map<String, RestoreHandler> restoreHandlers = new HashMap<>();
 
     @Override
     public void onInitialize() {
@@ -71,7 +64,7 @@ public class BetterGraves implements ModInitializer {
         BetterGraveBE grave = (BetterGraveBE)be;
 
         grave.storeInventory(player.inventory);
-        deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player)));
+        BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player)));
     }
 
 

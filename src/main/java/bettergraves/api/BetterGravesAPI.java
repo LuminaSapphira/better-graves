@@ -1,12 +1,16 @@
 package bettergraves.api;
 
-import bettergraves.BetterGraves;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BetterGravesAPI {
 
+    public static Map<String, DeathHandler> deathHandlers = new HashMap<>();
+    public static Map<String, RestoreHandler> restoreHandlers = new HashMap<>();
+
     public void registerDeathHandler(String key, DeathHandler handler, RestoreHandler restoreHandler) {
-        BetterGraves.deathHandlers.put(key, handler);
-        BetterGraves.restoreHandlers.put(key, restoreHandler);
+        deathHandlers.put(key, handler);
+        restoreHandlers.put(key, restoreHandler);
     }
 
 }

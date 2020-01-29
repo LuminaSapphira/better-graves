@@ -1,6 +1,7 @@
 package bettergraves.block;
 
 import bettergraves.BetterGraves;
+import bettergraves.api.BetterGravesAPI;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
@@ -117,7 +118,7 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
     }
 
     public void restoreInventory(PlayerEntity player) {
-        BetterGraves.restoreHandlers.forEach((key, handler) -> {
+        BetterGravesAPI.restoreHandlers.forEach((key, handler) -> {
             handler.restoreItems(getStoredCustomInventory(key));
         });
         PlayerInventory old = new PlayerInventory(player);
