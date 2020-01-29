@@ -1,7 +1,10 @@
 package bettergraves.mixin;
 
+import bettergraves.BetterGraves;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.DefaultedList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,13 +18,17 @@ public abstract class MixinPlayerInventory {
 
     @Shadow @Final private List<DefaultedList<ItemStack>> combinedInventory;
 
+    @Shadow @Final public PlayerEntity player;
+
     /**
      * Overwritten to add slot-aware compatibility to Better Graves
      * @author CerulanLumina
      */
     @Overwrite
     public void dropAll() {
-
+        if (player.world.isClient) return;
+        ServerPlayerEntity player = (ServerPlayerEntity)this.player;
+        BetterGraves.placeGrave(player.getBlockPos(), player, player.getServerWorld());
         this.combinedInventory.forEach(DefaultedList::clear);
     }
 

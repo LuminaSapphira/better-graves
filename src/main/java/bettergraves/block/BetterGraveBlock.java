@@ -1,20 +1,43 @@
 package bettergraves.block;
 
+import bettergraves.BetterGraves;
 import net.fabricmc.fabric.api.block.FabricBlockSettings;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 
 public class BetterGraveBlock extends BlockWithEntity {
 
     public BetterGraveBlock() {
-        super(FabricBlockSettings.copy(Blocks.BEDROCK).lightLevel(8).build());
+        super(FabricBlockSettings.copy(Blocks.BEDROCK).dropsNothing().nonOpaque().lightLevel(8).build());
+    }
+
+    @Override
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if (world.isClient) return ActionResult.SUCCESS;
+        BlockEntity be = world.getBlockEntity(pos);
+        assert be instanceof BetterGraveBE;
+//        if (((BetterGraveBE) be).doesPlayerMatch(player)) {
+            BetterGraveBE grave = (BetterGraveBE)be;
+            grave.restoreInventory(player);
+            world.removeBlock(pos, false);
+            return ActionResult.SUCCESS;
+//        } else return ActionResult.FAIL;
     }
 
     @Override
     public BlockEntity createBlockEntity(BlockView view) {
-        return null;
+        return new BetterGraveBE();
     }
 }

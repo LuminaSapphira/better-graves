@@ -102,12 +102,25 @@ public class BetterGraveBE extends BlockEntity {
 
     public void storeInventory(PlayerInventory playerInventory) {
         this.storedInventory = playerInventory.serialize(new ListTag());
+        this.player = playerInventory.player.getGameProfile().getId();
     }
 
     public void storeInventory(String key, Map<Integer, ItemStack> inventory) {
         ImmutableMap.Builder<Integer, ItemStack> nMap = ImmutableMap.builder();
         inventory.forEach((slot, stack) -> nMap.put(slot, stack.copy()));
         this.customInventories.put(key, nMap.build());
+    }
+
+    public void restoreInventory(PlayerEntity player) {
+        BetterGraves.restoreHandlers.forEach((key, handler) -> {
+            handler.restoreItems(getStoredCustomInventory(key));
+        });
+        PlayerInventory old = new PlayerInventory(player);
+        old.clone(player.inventory);
+        player.inventory.deserialize((ListTag)getStoredPlayerInventory());
+        for (int i = 0; i < old.getInvSize(); ++i) {
+            player.inventory.offerOrDrop(player.world, old.getInvStack(i));
+        }
     }
 
     @Nullable
