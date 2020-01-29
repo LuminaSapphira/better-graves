@@ -1,8 +1,9 @@
 package bettergraves.block;
 
 import net.fabricmc.fabric.api.block.FabricBlockSettings;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -13,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 
-public class BetterGraveBlock extends BlockWithEntity {
+public class BetterGraveBlock extends Block implements BlockEntityProvider {
 
     public BetterGraveBlock() {
         super(FabricBlockSettings.copy(Blocks.BEDROCK).dropsNothing().nonOpaque().lightLevel(8).build());
@@ -24,12 +25,17 @@ public class BetterGraveBlock extends BlockWithEntity {
         if (world.isClient) return ActionResult.SUCCESS;
         BlockEntity be = world.getBlockEntity(pos);
         assert be instanceof BetterGraveBE;
-//        if (((BetterGraveBE) be).doesPlayerMatch(player)) {
+        if (((BetterGraveBE) be).doesPlayerMatch(player)) {
             BetterGraveBE grave = (BetterGraveBE)be;
             grave.restoreInventory(player);
             world.removeBlock(pos, false);
             return ActionResult.SUCCESS;
-//        } else return ActionResult.FAIL;
+        } else return ActionResult.FAIL;
+    }
+
+    @Override
+    public boolean hasBlockEntity() {
+        return true;
     }
 
     @Override
