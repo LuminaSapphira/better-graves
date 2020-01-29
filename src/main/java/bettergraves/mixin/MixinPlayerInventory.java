@@ -21,8 +21,8 @@ public abstract class MixinPlayerInventory {
     @Shadow @Final public PlayerEntity player;
 
     /**
-     * Overwritten to add slot-aware compatibility to Better Graves
      * @author CerulanLumina
+     * @reason Overwritten to add slot-aware compatibility to Better Graves
      */
     @Overwrite
     public void dropAll() {

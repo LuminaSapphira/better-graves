@@ -2,8 +2,10 @@ package bettergraves.block;
 
 import bettergraves.BetterGraves;
 import com.google.common.collect.ImmutableMap;
-import javax.annotation.Nullable;
+import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.SkullBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -12,14 +14,15 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.Tag;
 
-import java.util.*;
-import java.util.function.BiFunction;
+import javax.annotation.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
-public class BetterGraveBE extends BlockEntity {
+public class BetterGraveBE extends BlockEntity implements BlockEntityClientSerializable {
 
     private Tag storedInventory = null;
     private Map<String, ImmutableMap<Integer, ItemStack>> customInventories = new HashMap<>();
-    private UUID player = null;
+    private GameProfile player = null;
 
     public BetterGraveBE() {
         super(BetterGraves.BETTER_GRAVE_BE_TYPE);
@@ -30,7 +33,7 @@ public class BetterGraveBE extends BlockEntity {
     public void fromTag(CompoundTag tag) {
         super.fromTag(tag);
         if (!tag.contains("Player")) return;
-        player = NbtHelper.toUuid(tag.getCompound("Player"));
+        player = NbtHelper.toGameProfile(tag.getCompound("Player"));
         if (tag.contains("PlayerInventory"))
             storedInventory = tag.get("PlayerInventory").copy();
         if (tag.contains("CustomInventoryCount")) {
@@ -50,7 +53,7 @@ public class BetterGraveBE extends BlockEntity {
     public CompoundTag toTag(CompoundTag tag) {
         if (storedInventory != null) {
             tag.put("PlayerInventory", storedInventory);
-            tag.put("Player", NbtHelper.fromUuid(player));
+            tag.put("Player", NbtHelper.fromGameProfile(new CompoundTag(), player));
         }
         if (customInventories.size() > 0) {
             tag.putInt("CustomInventoryCount", customInventories.size());
@@ -102,7 +105,9 @@ public class BetterGraveBE extends BlockEntity {
 
     public void storeInventory(PlayerInventory playerInventory) {
         this.storedInventory = playerInventory.serialize(new ListTag());
-        this.player = playerInventory.player.getGameProfile().getId();
+        this.player = new GameProfile(playerInventory.player.getGameProfile().getId(), playerInventory.player.getGameProfile().getName());
+        SkullBlockEntity.loadProperties(this.player);
+        sync();
     }
 
     public void storeInventory(String key, Map<Integer, ItemStack> inventory) {
@@ -129,7 +134,21 @@ public class BetterGraveBE extends BlockEntity {
     }
 
     public boolean doesPlayerMatch(PlayerEntity player) {
-        return player.getGameProfile().getId().equals(this.player);
+        return player.getGameProfile().getId().equals(this.player.getId());
     }
 
+    public GameProfile getOwner() {
+        return this.player;
+    }
+
+    @Override
+    public void fromClientTag(CompoundTag compoundTag) {
+        this.player = NbtHelper.toGameProfile(compoundTag.getCompound("Player"));
+    }
+
+    @Override
+    public CompoundTag toClientTag(CompoundTag compoundTag) {
+        compoundTag.put("Player", NbtHelper.fromGameProfile(new CompoundTag(), this.player));
+        return compoundTag;
+    }
 }
