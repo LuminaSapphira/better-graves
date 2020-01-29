@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "bettergraves",
+  "version": "${version}",
+  "name": "Better Graves",
+  "description": "A better gravestone / death inventory mod",
+  "authors": [
+    "CerulanLumina"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/bettergraves/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "bettergraves.BetterGraves"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.4.0",
+    "fabric": "*"
+  },
+  "mixins": [
+    "bettergraves.mixins.json"
+  ]
+}

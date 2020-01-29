@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "package": "bettergraves.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "MixinPlayerInventory"
+  ],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
