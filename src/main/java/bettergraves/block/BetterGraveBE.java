@@ -3,7 +3,9 @@ package bettergraves.block;
 import bettergraves.BetterGraves;
 import bettergraves.api.BetterGravesAPI;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SkullBlockEntity;
@@ -106,8 +108,8 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
 
     public void storeInventory(PlayerInventory playerInventory) {
         this.storedInventory = playerInventory.serialize(new ListTag());
-        this.player = new GameProfile(playerInventory.player.getGameProfile().getId(), playerInventory.player.getGameProfile().getName());
-        SkullBlockEntity.loadProperties(this.player);
+        // Copies the GameProfile
+        this.player = NbtHelper.toGameProfile(NbtHelper.fromGameProfile(new CompoundTag(), playerInventory.player.getGameProfile()));
         sync();
     }
 
