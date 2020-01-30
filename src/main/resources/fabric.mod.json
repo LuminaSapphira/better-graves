@@ -7,7 +7,10 @@
   "authors": [
     "CerulanLumina"
   ],
-  "contact": {},
+  "contact": {
+    "issues": "https://github.com/CerulanLumina/better-graves/issues",
+    "homepage": "https://github.com/CerulanLumina/better-graves/issues"
+  },
   "license": "MIT",
   "icon": "assets/bettergraves/icon.png",
   "environment": "*",
