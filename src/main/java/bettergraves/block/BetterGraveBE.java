@@ -3,12 +3,9 @@ package bettergraves.block;
 import bettergraves.BetterGraves;
 import bettergraves.api.BetterGravesAPI;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.SkullBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -16,6 +13,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.Tag;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -110,7 +109,13 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
         this.storedInventory = playerInventory.serialize(new ListTag());
         // Copies the GameProfile
         this.player = NbtHelper.toGameProfile(NbtHelper.fromGameProfile(new CompoundTag(), playerInventory.player.getGameProfile()));
-        sync();
+    }
+
+    @Override
+    public void setLocation(World world, BlockPos pos) {
+        super.setLocation(world, pos);
+        if (!world.isClient)
+            sync();
     }
 
     public void storeInventory(String key, Map<Integer, ItemStack> inventory) {

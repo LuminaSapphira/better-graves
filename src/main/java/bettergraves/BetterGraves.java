@@ -10,6 +10,8 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.crash.CrashException;
+import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -57,14 +59,21 @@ public class BetterGraves implements ModInitializer {
     }
 
     public static void placeGrave(BlockPos deathLocation, ServerPlayerEntity player, ServerWorld world) {
-        BlockPos pos = gravePos(deathLocation, world);
-        world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
-        BlockEntity be = world.getBlockEntity(pos);
-        if (!(be instanceof BetterGraveBE)) throw new RuntimeException("Not block entity!");
-        BetterGraveBE grave = (BetterGraveBE)be;
-
+        BetterGraveBE grave = new BetterGraveBE();
         grave.storeInventory(player.inventory);
         BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player)));
+        new Thread(() -> {
+            try {
+                Thread.sleep(100, 0);
+                world.getServer().execute(() -> {
+                    BlockPos pos = gravePos(deathLocation, world);
+                    world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
+                    world.setBlockEntity(pos, grave);
+                });
+            } catch (InterruptedException e) {
+                throw new CrashException(CrashReport.create(e, "Placing grave"));
+            }
+        }).start();
     }
 
 
