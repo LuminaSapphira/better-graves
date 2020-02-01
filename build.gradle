@@ -10,6 +10,24 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
+repositories {
+	mavenCentral()
+	maven {
+		url = "https://jitpack.io"
+	}
+	maven {
+		name = "NerdHubMC"
+		url = "https://maven.abusedmaster.xyz"
+	}
+	maven {
+		url "https://maven.jamieswhiteshirt.com/libs-release/"
+	}
+	maven {
+		name = "Cotton"
+		url = "http://server.bbkr.space:8081/artifactory/libs-release/"
+	}
+}
+
 minecraft {
 }
 
@@ -24,7 +42,11 @@ dependencies {
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	modCompile "io.github.prospector:modmenu:1.8.5+build.23"
+	modImplementation "io.github.prospector:modmenu:1.8.5+build.23"
+	modCompile "com.github.emilyploszaj:trinkets:${project.trinkets_version}"
+	modCompile "com.github.emilyploszaj:bunch-o-trinkets:${project.bunchotrinkets_version}"
+	modCompile "io.github.cottonmc:Jankson-Fabric:${project.jankson_version}"
+	include "io.github.cottonmc:Jankson-Fabric:${project.jankson_version}"
 }
 
 processResources {

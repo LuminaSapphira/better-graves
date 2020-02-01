@@ -3,7 +3,9 @@ package bettergraves;
 import bettergraves.api.BetterGravesAPI;
 import bettergraves.block.BetterGraveBE;
 import bettergraves.block.BetterGraveBlock;
+import bettergraves.compat.TrinketsCompat;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -29,11 +31,17 @@ public class BetterGraves implements ModInitializer {
     public static BlockEntityType<BetterGraveBE> BETTER_GRAVE_BE_TYPE;
     public static final BetterGraveBlock BETTER_GRAVE_BLOCK = new BetterGraveBlock();
 
+    public static BGConfig config = null;
+
     @Override
     public void onInitialize() {
         log(Level.INFO, "Initializing");
         Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "better_grave"), BETTER_GRAVE_BLOCK);
+        config = BGConfig.getConfig(FabricLoader.getInstance().getConfigDirectory().toPath());
         BETTER_GRAVE_BE_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "better_grave"), BlockEntityType.Builder.create(BetterGraveBE::new, BETTER_GRAVE_BLOCK).build(null));
+        if (FabricLoader.getInstance().isModLoaded("trinkets") && config.enableTrinketsCompat) {
+            TrinketsCompat.register();
+        }
     }
 
     public static void log(Level level, String message){
