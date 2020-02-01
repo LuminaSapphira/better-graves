@@ -8,6 +8,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.EntityContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -25,12 +26,12 @@ public class BetterGraveBlock extends Block implements BlockEntityProvider {
 
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient) return ActionResult.SUCCESS;
         BlockEntity be = world.getBlockEntity(pos);
         assert be instanceof BetterGraveBE;
         if (((BetterGraveBE) be).doesPlayerMatch(player)) {
+            if (world.isClient) return ActionResult.SUCCESS;
             BetterGraveBE grave = (BetterGraveBE)be;
-            grave.restoreInventory(player);
+            grave.restoreInventory((ServerPlayerEntity)player);
             world.removeBlock(pos, false);
             return ActionResult.SUCCESS;
         } else return ActionResult.FAIL;

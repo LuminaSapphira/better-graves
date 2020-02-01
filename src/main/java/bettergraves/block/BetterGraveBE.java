@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.Tag;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -124,9 +125,9 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
         this.customInventories.put(key, nMap.build());
     }
 
-    public void restoreInventory(PlayerEntity player) {
+    public void restoreInventory(ServerPlayerEntity player) {
         BetterGravesAPI.restoreHandlers.forEach((key, handler) -> {
-            handler.restoreItems(getStoredCustomInventory(key));
+            handler.restoreItems(player, getStoredCustomInventory(key));
         });
         PlayerInventory old = new PlayerInventory(player);
         old.clone(player.inventory);
