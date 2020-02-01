@@ -4,9 +4,8 @@ import bettergraves.api.BetterGravesAPI;
 import bettergraves.block.BetterGraveBE;
 import bettergraves.block.BetterGraveBlock;
 import net.fabricmc.api.ModInitializer;
-
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -58,10 +57,10 @@ public class BetterGraves implements ModInitializer {
 
     }
 
-    public static void placeGrave(BlockPos deathLocation, ServerPlayerEntity player, ServerWorld world) {
+    public static void placeGrave(BlockPos deathLocation, ServerPlayerEntity player, ServerWorld world, DamageSource source) {
         BetterGraveBE grave = new BetterGraveBE();
+        BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player, source)));
         grave.storeInventory(player.inventory);
-        BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player)));
         new Thread(() -> {
             try {
                 Thread.sleep(100, 0);

@@ -1,6 +1,7 @@
 package bettergraves.mixin;
 
 import bettergraves.BetterGraves;
+import bettergraves.mixinimpl.DropDamageSourceTrack;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,7 +23,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
     public void dropAll(PlayerInventory inventory) {
         if (this.world.isClient) return;
         ServerPlayerEntity player = (ServerPlayerEntity)(Object)this;
-        BetterGraves.placeGrave(player.getBlockPos(), player, player.getServerWorld());
+        BetterGraves.placeGrave(player.getBlockPos(), player, player.getServerWorld(), ((DropDamageSourceTrack)player).bettergraves$getDamageSource());
         inventory.clear();
     }
 
