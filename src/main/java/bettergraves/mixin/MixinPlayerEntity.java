@@ -19,8 +19,8 @@ public abstract class MixinPlayerEntity extends LivingEntity {
         super(type, world);
     }
 
-    @Redirect(method = "dropInventory", at = @At(value = "INVOKE", ordinal = 4), require = 1)
-    public void dropAll(PlayerInventory inventory) {
+    @Redirect(method = "dropInventory", at = @At(value = "INVOKE", target = "net.minecraft.entity.player.PlayerInventory.dropAll()V"), require = 1)
+    private void dropAll(PlayerInventory inventory) {
         if (this.world.isClient) return;
         ServerPlayerEntity player = (ServerPlayerEntity)(Object)this;
         BetterGraves.placeGrave(player.getBlockPos(), player, player.getServerWorld(), ((DropDamageSourceTrack)player).bettergraves$getDamageSource());
