@@ -1,9 +1,12 @@
 package bettergraves;
 
 import bettergraves.api.BetterGravesAPI;
+import bettergraves.api.DeathHandler;
+import bettergraves.api.RestoreHandler;
 import bettergraves.block.BetterGraveBE;
 import bettergraves.block.BetterGraveBlock;
 import bettergraves.compat.TrinketsCompat;
+import com.google.common.collect.ImmutableMap;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntityType;
@@ -11,6 +14,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.util.crash.CrashException;
 import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.math.BlockPos;
@@ -20,6 +24,11 @@ import net.minecraft.world.Heightmap;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class BetterGraves implements ModInitializer {
 
@@ -65,17 +74,48 @@ public class BetterGraves implements ModInitializer {
 
     }
 
-    public static void placeGrave(BlockPos deathLocation, ServerPlayerEntity player, ServerWorld world, DamageSource source) {
+    public static void placeGrave(BlockPos deathLocation, ServerPlayerEntity player, ServerWorld world, DamageSource deathBlow) {
+        // Create an orphaned Grave BlockEntity to store inventory in prior to grave placement
         BetterGraveBE grave = new BetterGraveBE();
-        BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player, source)));
-        grave.storeInventory(player.inventory);
+
+        // API : Pre-store handlers - determines whether we should use their logic for graves
+        List<String> keys = BetterGravesAPI.preStoreHandlers.entrySet()
+                .stream()
+                .filter(entry ->
+                        entry.getValue().beforeGraveStore(world, deathLocation, player, deathBlow))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        // If a pre-store handler returned true (should use their logic), do so, otherwise, use standard logic
+        Optional<String> graveKey = Optional.empty();
+        if (keys.size() > 0) {
+            if (keys.size() > 1)
+                log(Level.WARN, "Duplicate grave handlers for a given context! Only using first. [" + String.join(",", keys) + "]");
+            graveKey = Optional.of(keys.get(0));
+            ImmutableMap.Builder<String, Pair<DeathHandler, RestoreHandler>> mapBuilder = ImmutableMap.builder();
+            BetterGravesAPI.deathHandlers.forEach((key, handler) -> mapBuilder.put(key, new Pair<>(handler, BetterGravesAPI.restoreHandlers.get(key))));
+            BetterGravesAPI.storeHandlers.get(graveKey.get()).store(world, deathLocation, player, deathBlow, mapBuilder.build());
+
+        } else {
+            BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player, deathBlow)));
+            grave.storeInventory(player.inventory);
+        }
+
+        Optional<String> finalGraveKey = graveKey;
         new Thread(() -> {
             try {
                 Thread.sleep(100, 0);
                 world.getServer().execute(() -> {
                     BlockPos pos = gravePos(deathLocation, world);
-                    world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
-                    world.setBlockEntity(pos, grave);
+                    // If any pre-store execute its placement handler
+                    // else normal logic
+                    if (finalGraveKey.isPresent()) {
+                        String key = finalGraveKey.get();
+                        BetterGravesAPI.gravePlacementHandlers.get(key).place(world, pos);
+                    } else {
+                        world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
+                        world.setBlockEntity(pos, grave);
+                    }
                 });
             } catch (InterruptedException e) {
                 throw new CrashException(CrashReport.create(e, "Placing grave"));
