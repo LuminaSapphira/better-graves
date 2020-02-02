@@ -9,9 +9,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
-public class MixinLivingEntity implements DropDamageSourceTrack {
+public abstract class MixinLivingEntity implements DropDamageSourceTrack {
 
-    DamageSource bettergraves$tracked = null;
+    private DamageSource bettergraves$tracked = null;
 
     @Inject(method = "drop", at = @At("HEAD"))
     private void onDrop(DamageSource source, CallbackInfo info) {
