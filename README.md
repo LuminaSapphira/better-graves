@@ -1,7 +1,7 @@
 # better-graves
 A better gravestone mod for Minecraft + Fabric
 
-[![](title/360599_%20_%20on%20CurseForge.svg)](https://www.curseforge.com/minecraft/mc-mods/better-graves)
+[![](http://cf.way2muchnoise.eu/title/360599_%20_%20on%20CurseForge.svg)](https://www.curseforge.com/minecraft/mc-mods/better-graves)
 
 Adds gravestones that are placed on player death. These graves
 remember your inventory layout and simply place them back into your
