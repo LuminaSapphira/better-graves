@@ -15,8 +15,6 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
-import net.minecraft.util.crash.CrashException;
-import net.minecraft.util.crash.CrashReport;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
@@ -25,6 +23,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,6 +73,8 @@ public class BetterGraves implements ModInitializer {
 
     }
 
+    public static HashSet<BlockPos> placingGraves = new HashSet<>();
+
     public static void placeGrave(BlockPos deathLocation, ServerPlayerEntity player, ServerWorld world, DamageSource deathBlow) {
         // Create an orphaned Grave BlockEntity to store inventory in prior to grave placement
         BetterGraveBE grave = new BetterGraveBE();
@@ -101,27 +102,27 @@ public class BetterGraves implements ModInitializer {
             grave.storeInventory(player.inventory);
         }
 
-        Optional<String> finalGraveKey = graveKey;
-        new Thread(() -> {
-            try {
-                Thread.sleep(100, 0);
+        BlockPos pos = gravePos(deathLocation, world);
+        // If any pre-store execute its placement handler
+        // else normal logic
+        if (graveKey.isPresent()) {
+            String key = graveKey.get();
+            BetterGravesAPI.gravePlacementHandlers.get(key).place(world, pos);
+        } else {
+            placingGraves.add(pos);
+            world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
+            world.setBlockEntity(pos, grave);
+            new Thread(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
                 world.getServer().execute(() -> {
-                    BlockPos pos = gravePos(deathLocation, world);
-                    // If any pre-store execute its placement handler
-                    // else normal logic
-                    if (finalGraveKey.isPresent()) {
-                        String key = finalGraveKey.get();
-                        BetterGravesAPI.gravePlacementHandlers.get(key).place(world, pos);
-                    } else {
-                        world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
-                        world.setBlockEntity(pos, grave);
-                    }
+                    BetterGraves.placingGraves.remove(pos);
                 });
-            } catch (InterruptedException e) {
-                throw new CrashException(CrashReport.create(e, "Placing grave"));
-            }
-        }).start();
+            }).start();
+        }
     }
-
 
 }
