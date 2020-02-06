@@ -42,27 +42,36 @@ public class BetterGravesAPI {
      * @param restoreHandler The RestoreHandler that deserializes the previously provided Map
      */
     public static void registerDeathHandler(String key, DeathHandler deathHandler, RestoreHandler restoreHandler) {
-        BetterGraves.log(Level.INFO, "Registering handler " + key);
-        if (deathHandlers.containsKey(key)) {
-            throw new CrashException(
-                    CrashReport.create(new RuntimeException("Duplicate key"),
-                            "Duplicate DeathHandler key " + key));
+        if (BetterGraves.config.disabledCompat.contains(key)) {
+            BetterGraves.log(Level.INFO, "Skipping registration of handler due to config: " + key);
+        } else {
+            BetterGraves.log(Level.INFO, "Registering handler " + key);
+            if (deathHandlers.containsKey(key)) {
+                throw new CrashException(
+                        CrashReport.create(new RuntimeException("Duplicate key"),
+                                "Duplicate DeathHandler key " + key));
+            }
+            deathHandlers.put(key, deathHandler);
+            restoreHandlers.put(key, restoreHandler);
         }
-        deathHandlers.put(key, deathHandler);
-        restoreHandlers.put(key, restoreHandler);
     }
 
     public static void registerCustomGraveHandler(String key, GravePreStoreHandler preStoreHandler, GraveStoreHandler storeHandler, GravePlacementHandler placementHandler) {
-        BetterGraves.log(Level.INFO, "Registering custom grave logic for " + key);
-        if (preStoreHandlers.containsKey(key)) {
-            throw new CrashException(
-                    CrashReport.create(new RuntimeException("Duplicate key"),
-                            "Duplicate custom grave handler key " + key)
-            );
+        if (BetterGraves.config.disabledCompat.contains(key)) {
+            BetterGraves.log(Level.INFO, "Skipping registration of custom grave logic due to config: " + key);
+        } else {
+            BetterGraves.log(Level.INFO, "Registering custom grave logic for " + key);
+            if (preStoreHandlers.containsKey(key)) {
+                throw new CrashException(
+                        CrashReport.create(new RuntimeException("Duplicate key"),
+                                "Duplicate custom grave handler key " + key)
+                );
+            }
+            preStoreHandlers.put(key, preStoreHandler);
+            storeHandlers.put(key, storeHandler);
+            gravePlacementHandlers.put(key, placementHandler);
+
         }
-        preStoreHandlers.put(key, preStoreHandler);
-        storeHandlers.put(key, storeHandler);
-        gravePlacementHandlers.put(key, placementHandler);
     }
 
 }

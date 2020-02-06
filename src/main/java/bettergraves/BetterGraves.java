@@ -48,7 +48,7 @@ public class BetterGraves implements ModInitializer {
         Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "better_grave"), BETTER_GRAVE_BLOCK);
         config = BGConfig.getConfig(FabricLoader.getInstance().getConfigDirectory().toPath());
         BETTER_GRAVE_BE_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "better_grave"), BlockEntityType.Builder.create(BetterGraveBE::new, BETTER_GRAVE_BLOCK).build(null));
-        if (FabricLoader.getInstance().isModLoaded("trinkets") && config.enableTrinketsCompat) {
+        if (FabricLoader.getInstance().isModLoaded("trinkets")) {
             TrinketsCompat.register();
         }
         ServerTickCallback.EVENT.register(server -> {

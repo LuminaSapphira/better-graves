@@ -13,13 +13,10 @@ import java.util.ArrayList;
 
 public class BGConfig {
 
-    @Comment("Add handler keys in here to disable them")
+    @Comment("Add handler keys in here to disable them\nInsert \"bg-trinkets\" to disable default trinkets compatibility")
     public ArrayList<String> disabledCompat = new ArrayList<>();
 
-    @Comment("When true, enables the default Trinkets compatibility plugin")
-    public boolean enableTrinketsCompat = true;
-
-    public static BGConfig getConfig(Path folder) {
+    static BGConfig getConfig(Path folder) {
         try {
 
             Jankson jankson = Jankson.builder().build();
@@ -47,7 +44,7 @@ public class BGConfig {
         Files.write(configPath, result.getBytes(), StandardOpenOption.CREATE);
     }
 
-    public BGConfig() {
+    private BGConfig() {
 
     }
 

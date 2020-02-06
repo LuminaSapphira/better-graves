@@ -9,7 +9,7 @@ import net.minecraft.item.ItemStack;
 public class TrinketsCompat {
 
     public static void register() {
-        BetterGravesAPI.registerDeathHandler("trinkets", (player, source) -> {
+        BetterGravesAPI.registerDeathHandler("bg-trinkets", (player, source) -> {
             ImmutableMap.Builder<Integer, ItemStack> map = ImmutableMap.builder();
             Inventory trinketsInv = TrinketsApi.getTrinketsInventory(player);
             for (int i = 0; i < trinketsInv.getInvSize(); ++i) {
