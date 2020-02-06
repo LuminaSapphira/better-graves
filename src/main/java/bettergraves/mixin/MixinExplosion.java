@@ -17,16 +17,15 @@ import java.util.Iterator;
 @Mixin(Explosion.class)
 public abstract class MixinExplosion {
 
-    BlockPos bettergraves$lastPos = null;
+    private BlockPos bettergraves$lastPos = null;
 
     @Redirect(method = "affectWorld", at = @At(value = "INVOKE", target = "net.minecraft.block.BlockState.isAir()Z", ordinal = 0))
-    public boolean isAirRedirect(BlockState state) {
+    private boolean isAirRedirect(BlockState state) {
         return state.isAir() || BetterGraves.placingGraves.contains(bettergraves$lastPos);
     }
 
-
     @Inject(method = "affectWorld", at = @At(value = "INVOKE", target = "net/minecraft/world/World.getBlockState(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void getStateInject(boolean bl, CallbackInfo ci, boolean bl2, ObjectArrayList objectArrayList, Iterator var4, BlockPos blockPos) {
+    private void getStateInject(boolean bl, CallbackInfo ci, boolean bl2, ObjectArrayList objectArrayList, Iterator var4, BlockPos blockPos) {
         bettergraves$lastPos = blockPos;
     }
 
