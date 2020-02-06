@@ -8,6 +8,7 @@ import bettergraves.block.BetterGraveBlock;
 import bettergraves.compat.TrinketsCompat;
 import com.google.common.collect.ImmutableMap;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.event.server.ServerTickCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.damage.DamageSource;
@@ -50,6 +51,9 @@ public class BetterGraves implements ModInitializer {
         if (FabricLoader.getInstance().isModLoaded("trinkets") && config.enableTrinketsCompat) {
             TrinketsCompat.register();
         }
+        ServerTickCallback.EVENT.register(server -> {
+            placingGraves.clear();
+        });
     }
 
     public static void log(Level level, String message){
@@ -112,16 +116,6 @@ public class BetterGraves implements ModInitializer {
             placingGraves.add(pos);
             world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
             world.setBlockEntity(pos, grave);
-            new Thread(() -> {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                world.getServer().execute(() -> {
-                    BetterGraves.placingGraves.remove(pos);
-                });
-            }).start();
         }
     }
 
