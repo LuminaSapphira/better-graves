@@ -17,6 +17,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.Heightmap;
@@ -62,15 +63,26 @@ public class BetterGraves implements ModInitializer {
 
     private static BlockPos gravePos(BlockPos deathLocation, ServerWorld world) {
         BlockPos adjusted = deathLocation;
+        // clamp the pos to inside the world
         if (deathLocation.getY() < 0 || deathLocation.getY() > world.getHeight()) {
-            adjusted = new BlockPos(adjusted.getX(), MathHelper.clamp(adjusted.getY(), 0, 255), adjusted.getZ());
+            adjusted = new BlockPos(adjusted.getX(), MathHelper.clamp(adjusted.getY(), 0,  world.getEffectiveHeight()), adjusted.getZ());
         }
+
+        boolean found = false;
+        // if that pos is not air, find the next air above it within the world
         if (!world.getBlockState(adjusted).isAir()) {
-            adjusted = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, adjusted);
-        } else if (world.getBlockState(adjusted.down()).isAir()) {
-            adjusted = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING, adjusted);
+
+            for (int i = 0; i < world.getEffectiveHeight() - adjusted.getY(); ++i) {
+                if (world.getBlockState(adjusted.offset(Direction.UP, i)).isAir()) {
+                    adjusted = adjusted.offset(Direction.UP, i);
+                    found = true;
+                    break;
+                }
+            }
+
         }
-        if (adjusted.getY() < 0 || adjusted.getY() > world.getHeight() && world.getBlockState(deathLocation).getHardness(world, deathLocation) >= 0) {
+
+        if (!found) {
             return deathLocation;
         }
         return adjusted;
