@@ -12,6 +12,7 @@ import net.fabricmc.fabric.api.event.server.ServerTickCallback;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -20,15 +21,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.Heightmap;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.nio.file.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BetterGraves implements ModInitializer {
@@ -114,8 +116,7 @@ public class BetterGraves implements ModInitializer {
             BetterGravesAPI.storeHandlers.get(graveKey.get()).store(world, deathLocation, player, deathBlow, mapBuilder.build());
 
         } else {
-            BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player, deathBlow)));
-            grave.storeInventory(player.inventory);
+            storeAndSaveInventory(grave, player, deathBlow);
         }
 
         BlockPos pos = gravePos(deathLocation, world);
@@ -129,6 +130,47 @@ public class BetterGraves implements ModInitializer {
             world.setBlockState(pos, BETTER_GRAVE_BLOCK.getDefaultState());
             world.setBlockEntity(pos, grave);
         }
+    }
+
+    private static void storeAndSaveInventory(BetterGraveBE grave, ServerPlayerEntity player, DamageSource deathBlow) {
+        BetterGravesAPI.deathHandlers.forEach((key, handler) -> grave.storeInventory(key, handler.handleDeath(player, deathBlow)));
+        grave.storeInventory(player.inventory);
+        CompoundTag outer = new CompoundTag();
+        CompoundTag tag = grave.toTag(new CompoundTag());
+        outer.put("grave", tag);
+        try {
+            new Thread(() -> {
+                try {
+                    Path folder = Paths.get("bettergraves");
+                    Path file = folder.resolve(String.format("grave_%s_%s.nbt", player.getGameProfile().getName(), formatTimeStamp()));
+                    Files.createDirectories(folder);
+                    File output = Files.createFile(file).toFile();
+                    DataOutputStream dos = new DataOutputStream(new FileOutputStream(output));
+                    outer.write(dos);
+                    dos.flush();
+                    dos.close();
+                } catch (Exception ex) {
+                    log(Level.ERROR, "Unable to save grave information to file");
+                    LOGGER.catching(Level.ERROR, ex);
+                }
+            }).start();
+        } catch (Exception ex) {
+            log(Level.ERROR, "Unable to save grave information to file");
+            LOGGER.catching(Level.ERROR, ex);
+        }
+    }
+
+    private static String formatTimeStamp() {
+        Calendar cal = Calendar.getInstance();
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH);
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        int minute = cal.get(Calendar.MINUTE);
+        int second = cal.get(Calendar.SECOND);
+
+        return String.format("%d-%d-%d+%d.%d.%d", year, month, day, hour, minute, second);
+
     }
 
 }
