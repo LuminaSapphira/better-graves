@@ -1,5 +1,6 @@
 package bettergraves.client.render;
 
+import bettergraves.BetterGraves;
 import bettergraves.block.BetterGraveBE;
 import net.minecraft.block.SkullBlock;
 import net.minecraft.client.MinecraftClient;
@@ -12,6 +13,7 @@ import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.apache.logging.log4j.Level;
 
 public class GraveRenderer extends BlockEntityRenderer<BetterGraveBE> {
     public GraveRenderer(BlockEntityRenderDispatcher dispatcher) {
@@ -20,6 +22,15 @@ public class GraveRenderer extends BlockEntityRenderer<BetterGraveBE> {
 
     @Override
     public void render(BetterGraveBE blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, int overlay) {
+        if (blockEntity == null) return;
+        else if (blockEntity.getOwner() == null) {
+            BetterGraves.log(Level.ERROR, "Grave BE Owner is null, cannot render");
+            return;
+        }
+        else if (blockEntity.getOwner().getName() == null) {
+            BetterGraves.log(Level.ERROR, "Grave BE Owner name is null, cannot render");
+            return;
+        }
         matrices.push();
         matrices.translate(0.0, 0.125, 0.0);
         SkullBlockEntityRenderer.render(null, 0f, SkullBlock.Type.PLAYER, blockEntity.getOwner(), 0f, matrices, vertexConsumers, light);
