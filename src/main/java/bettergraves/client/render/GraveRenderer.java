@@ -9,9 +9,9 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.block.entity.SkullBlockEntityRenderer;
-import net.minecraft.client.util.math.Matrix4f;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.Level;
 
@@ -53,7 +53,7 @@ public class GraveRenderer extends BlockEntityRenderer<BetterGraveBE> {
             float g = MinecraftClient.getInstance().options.getTextBackgroundOpacity(0.25F);
             int k = (int)(g * 255.0F) << 24;
             TextRenderer textRenderer = this.dispatcher.getTextRenderer();
-            float h = (float)(-textRenderer.getStringWidth(string) / 2);
+            float h = (float)(-textRenderer.getWidth(string) / 2);
             textRenderer.draw(string, h, (float)j, 553648127, false, matrix4f, vertexConsumerProvider, false, k, light);
             textRenderer.draw(string, h, (float)j, -1, false, matrix4f, vertexConsumerProvider, false, 0, light);
 

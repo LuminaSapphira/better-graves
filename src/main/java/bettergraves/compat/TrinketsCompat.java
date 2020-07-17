@@ -12,14 +12,14 @@ public class TrinketsCompat {
         BetterGravesAPI.registerDeathHandler("bg-trinkets", (player, source) -> {
             ImmutableMap.Builder<Integer, ItemStack> map = ImmutableMap.builder();
             Inventory trinketsInv = TrinketsApi.getTrinketsInventory(player);
-            for (int i = 0; i < trinketsInv.getInvSize(); ++i) {
-                map.put(i, trinketsInv.getInvStack(i));
+            for (int i = 0; i < trinketsInv.size(); ++i) {
+                map.put(i, trinketsInv.getStack(i));
             }
             trinketsInv.clear();
             return map.build();
         }, (player, map) -> {
             Inventory inv = TrinketsApi.getTrinketsInventory(player);
-            map.forEach(inv::setInvStack);
+            map.forEach(inv::setStack);
         });
     }
 

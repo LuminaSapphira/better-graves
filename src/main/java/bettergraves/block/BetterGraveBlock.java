@@ -1,12 +1,8 @@
 package bettergraves.block;
 
-import net.fabricmc.fabric.api.block.FabricBlockSettings;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
+import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.EntityContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.ActionResult;
@@ -21,7 +17,7 @@ import net.minecraft.world.World;
 public class BetterGraveBlock extends Block implements BlockEntityProvider {
 
     public BetterGraveBlock() {
-        super(FabricBlockSettings.copy(Blocks.BEDROCK).dropsNothing().nonOpaque().lightLevel(8).build());
+        super(FabricBlockSettings.copy(Blocks.BEDROCK).dropsNothing().nonOpaque().lightLevel(value -> 8));
     }
 
     @Override
@@ -42,13 +38,8 @@ public class BetterGraveBlock extends Block implements BlockEntityProvider {
     private static VoxelShape outline = VoxelShapes.union(plate, head);
 
     @Override
-    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, EntityContext ePos) {
+    public VoxelShape getOutlineShape(BlockState state, BlockView view, BlockPos pos, ShapeContext ePos) {
         return outline;
-    }
-
-    @Override
-    public boolean hasBlockEntity() {
-        return true;
     }
 
     @Override
