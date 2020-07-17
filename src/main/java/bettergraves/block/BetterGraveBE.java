@@ -5,6 +5,7 @@ import bettergraves.api.BetterGravesAPI;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -33,8 +34,8 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
     }
 
     @Override
-    public void fromTag(CompoundTag tag) {
-        super.fromTag(tag);
+    public void fromTag(BlockState state, CompoundTag tag) {
+        super.fromTag(state, tag);
         if (!tag.contains("Player")) return;
         player = NbtHelper.toGameProfile(tag.getCompound("Player"));
         if (tag.contains("PlayerInventory"))
@@ -132,8 +133,8 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
         PlayerInventory old = new PlayerInventory(player);
         old.clone(player.inventory);
         player.inventory.deserialize((ListTag)getStoredPlayerInventory());
-        for (int i = 0; i < old.getInvSize(); ++i) {
-            player.inventory.offerOrDrop(player.world, old.getInvStack(i));
+        for (int i = 0; i < old.size(); ++i) {
+            player.inventory.offerOrDrop(player.world, old.getStack(i));
         }
     }
 
