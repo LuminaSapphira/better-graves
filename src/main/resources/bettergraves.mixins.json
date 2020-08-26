@@ -3,9 +3,10 @@
   "package": "bettergraves.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "MixinPlayerEntity",
+    "MixinExplosion",
     "MixinLivingEntity",
-    "MixinExplosion"
+    "MixinPlayerEntity",
+    "MixinWorld"
   ],
   "client": [],
   "server": [],

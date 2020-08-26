@@ -27,6 +27,7 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
     private Tag storedInventory = null;
     private Map<String, ImmutableMap<Integer, ItemStack>> customInventories = new HashMap<>();
     private GameProfile player = null;
+    private boolean restored = false;
 
     public BetterGraveBE() {
         super(BetterGraves.BETTER_GRAVE_BE_TYPE);
@@ -127,15 +128,14 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
     }
 
     public void restoreInventory(ServerPlayerEntity player) {
-        BetterGravesAPI.restoreHandlers.forEach((key, handler) -> {
-            handler.restoreItems(player, getStoredCustomInventory(key));
-        });
+        BetterGravesAPI.restoreHandlers.forEach((key, handler) -> handler.restoreItems(player, getStoredCustomInventory(key)));
         PlayerInventory old = new PlayerInventory(player);
         old.clone(player.inventory);
         player.inventory.deserialize((ListTag)getStoredPlayerInventory());
         for (int i = 0; i < old.size(); ++i) {
             player.inventory.offerOrDrop(player.world, old.getStack(i));
         }
+        restored = true;
     }
 
     @Nullable
@@ -161,4 +161,6 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
         compoundTag.put("Player", NbtHelper.fromGameProfile(new CompoundTag(), this.player));
         return compoundTag;
     }
+
+    public boolean isRestored() { return restored; }
 }
