@@ -8,7 +8,7 @@ import bettergraves.block.BetterGraveBlock;
 import bettergraves.compat.TrinketsCompat;
 import com.google.common.collect.ImmutableMap;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.server.ServerTickCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.damage.DamageSource;
@@ -46,14 +46,12 @@ public class BetterGraves implements ModInitializer {
     public void onInitialize() {
         log(Level.INFO, "Initializing");
         Registry.register(Registry.BLOCK, new Identifier(MOD_ID, "better_grave"), BETTER_GRAVE_BLOCK);
-        config = BGConfig.getConfig(FabricLoader.getInstance().getConfigDirectory().toPath());
+        config = BGConfig.getConfig(FabricLoader.getInstance().getConfigDir());
         BETTER_GRAVE_BE_TYPE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(MOD_ID, "better_grave"), BlockEntityType.Builder.create(BetterGraveBE::new, BETTER_GRAVE_BLOCK).build(null));
         if (FabricLoader.getInstance().isModLoaded("trinkets")) {
             TrinketsCompat.register();
         }
-        ServerTickCallback.EVENT.register(server -> {
-            placingGraves.clear();
-        });
+        ServerTickEvents.END_SERVER_TICK.register(server -> placingGraves.clear());
     }
 
     public static void log(Level level, String message){
