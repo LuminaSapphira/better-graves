@@ -4,7 +4,6 @@ import bettergraves.BetterGraves;
 import bettergraves.api.BetterGravesAPI;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.authlib.GameProfile;
-import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,7 +13,9 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -22,21 +23,21 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BetterGraveBE extends BlockEntity implements BlockEntityClientSerializable {
+public class BetterGraveBE extends BlockEntity {
 
     private NbtElement storedInventory = null;
     private Map<String, ImmutableMap<Integer, ItemStack>> customInventories = new HashMap<>();
     private GameProfile player = null;
     private boolean restored = false;
 
-    public BetterGraveBE() {
-        super(BetterGraves.BETTER_GRAVE_BE_TYPE);
+    public BetterGraveBE(BlockPos pos, BlockState state) {
+        super(BetterGraves.BETTER_GRAVE_BE_TYPE, pos, state);
 
     }
 
     @Override
-    public void readNbt(BlockState state, NbtCompound tag) {
-        super.readNbt(state, tag);
+    public void readNbt(NbtCompound tag) {
+        super.readNbt(tag);
         if (!tag.contains("Player")) return;
         player = NbtHelper.toGameProfile(tag.getCompound("Player"));
         if (tag.contains("PlayerInventory"))
@@ -55,7 +56,7 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound tag) {
+    public void writeNbt(NbtCompound tag) {
         if (storedInventory != null) {
             tag.put("PlayerInventory", storedInventory);
             tag.put("Player", NbtHelper.writeGameProfile(new NbtCompound(), player));
@@ -73,7 +74,6 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
             });
             tag.put("CustomInventories", cListTag);
         }
-        return super.writeNbt(tag);
     }
 
     private static void serializeMap(Map<Integer, ItemStack> map, NbtCompound tag) {
@@ -114,13 +114,6 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
         this.player = NbtHelper.toGameProfile(NbtHelper.writeGameProfile(new NbtCompound(), playerInventory.player.getGameProfile()));
     }
 
-    @Override
-    public void setLocation(World world, BlockPos pos) {
-        super.setLocation(world, pos);
-        if (!world.isClient)
-            sync();
-    }
-
     public void storeInventory(String key, Map<Integer, ItemStack> inventory) {
         ImmutableMap.Builder<Integer, ItemStack> nMap = ImmutableMap.builder();
         inventory.forEach((slot, stack) -> nMap.put(slot, stack.copy()));
@@ -130,10 +123,10 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
     public void restoreInventory(ServerPlayerEntity player) {
         BetterGravesAPI.restoreHandlers.forEach((key, handler) -> handler.restoreItems(player, getStoredCustomInventory(key)));
         PlayerInventory old = new PlayerInventory(player);
-        old.clone(player.inventory);
-        player.inventory.readNbt((NbtList)getStoredPlayerInventory());
+        old.clone(player.getInventory());
+        player.getInventory().readNbt((NbtList)getStoredPlayerInventory());
         for (int i = 0; i < old.size(); ++i) {
-            player.inventory.offerOrDrop(player.world, old.getStack(i));
+            player.getInventory().offerOrDrop(old.getStack(i));
         }
         restored = true;
     }
@@ -152,14 +145,13 @@ public class BetterGraveBE extends BlockEntity implements BlockEntityClientSeria
     }
 
     @Override
-    public void fromClientTag(NbtCompound compoundTag) {
-        this.player = NbtHelper.toGameProfile(compoundTag.getCompound("Player"));
+    public BlockEntityUpdateS2CPacket toUpdatePacket() {
+        return BlockEntityUpdateS2CPacket.create(this);
     }
 
     @Override
-    public NbtCompound toClientTag(NbtCompound compoundTag) {
-        compoundTag.put("Player", NbtHelper.writeGameProfile(new NbtCompound(), this.player));
-        return compoundTag;
+    public NbtCompound toInitialChunkDataNbt() {
+        return this.createNbt();
     }
 
     public boolean isRestored() { return restored; }

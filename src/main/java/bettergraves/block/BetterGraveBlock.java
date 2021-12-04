@@ -43,7 +43,7 @@ public class BetterGraveBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockView view) {
-        return new BetterGraveBE();
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new BetterGraveBE(pos, state);
     }
 }
