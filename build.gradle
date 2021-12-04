@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '0.4-SNAPSHOT'
+	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'maven-publish'
 }
 
@@ -16,15 +16,18 @@ repositories {
 		url = "https://jitpack.io"
 	}
 	maven {
-		name = "NerdHubMC"
-		url = "https://maven.abusedmaster.xyz"
+		url = "https://maven.terraformersmc.com/releases/"
+		content {
+			includeGroup "com.terraformersmc"
+		}
 	}
 	maven {
-		url "https://maven.jamieswhiteshirt.com/libs-release/"
+		name = "Ladysnake Libs"
+		url = "https://ladysnake.jfrog.io/artifactory/mods"
 	}
 	maven {
 		name = "Cotton"
-		url = "http://server.bbkr.space:8081/artifactory/libs-release/"
+		url = "https://server.bbkr.space/artifactory/libs-release"
 	}
 }
 
@@ -42,9 +45,8 @@ dependencies {
 
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modImplementation "io.github.prospector:modmenu:${project.modmenu_version}"
+	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 	modImplementation "com.github.emilyploszaj:trinkets:${project.trinkets_version}"
-	modImplementation "com.github.emilyploszaj:bunch-o-trinkets:${project.bunchotrinkets_version}" // No 1.16 dev build
 	modImplementation "io.github.cottonmc:Jankson-Fabric:${project.jankson_version}"
 	include "io.github.cottonmc:Jankson-Fabric:${project.jankson_version}"
 }
