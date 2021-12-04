@@ -23,7 +23,7 @@ public abstract class MixinPlayerEntity extends LivingEntity {
     private void dropAll(PlayerInventory inventory) {
         if (this.world.isClient) return;
         ServerPlayerEntity player = (ServerPlayerEntity)(Object)this;
-        BetterGraves.placeGrave(player.getBlockPos(), player, player.getServerWorld(), ((DropDamageSourceTrack)player).bettergraves$getDamageSource());
+        BetterGraves.placeGrave(player.getBlockPos(), player, player.getWorld(), ((DropDamageSourceTrack)player).bettergraves$getDamageSource());
         inventory.clear();
     }
 

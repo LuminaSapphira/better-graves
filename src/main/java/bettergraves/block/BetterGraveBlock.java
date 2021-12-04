@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 public class BetterGraveBlock extends Block implements BlockEntityProvider {
 
     public BetterGraveBlock() {
-        super(FabricBlockSettings.copy(Blocks.BEDROCK).dropsNothing().nonOpaque().lightLevel(value -> 8));
+        super(FabricBlockSettings.copy(Blocks.BEDROCK).dropsNothing().nonOpaque().luminance(value -> 8));
     }
 
     @Override
@@ -43,7 +43,7 @@ public class BetterGraveBlock extends Block implements BlockEntityProvider {
     }
 
     @Override
-    public BlockEntity createBlockEntity(BlockView view) {
-        return new BetterGraveBE();
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new BetterGraveBE(pos, state);
     }
 }
